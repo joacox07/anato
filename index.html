@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Vacaciones del Grupo</title>
+<meta name="theme-color" content="#F3F6F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1A24" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vacaciones">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231F6F8B'/%3E%3Ccircle cx='90' cy='88' r='52' fill='%23FFB627'/%3E%3C/svg%3E">
 <meta name="description" content="Marcá qué días no podés entre diciembre y abril y encontremos cuándo juntarnos.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FFB627'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,9 +44,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-bod
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
 h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
 button,input{font:inherit;color:inherit}
-button{cursor:pointer}
+button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
 :focus-visible{outline:2px solid var(--sea);outline-offset:2px}
-.wrap{max-width:1280px;margin:0 auto;display:grid;gap:20px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+.wrap>*{min-width:0}
 
 header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
 .brand{display:flex;gap:14px;align-items:center}
@@ -65,6 +74,15 @@ h1{font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1}
 .me-badge{display:flex;align-items:center;gap:10px;font-weight:600}
 .link{background:none;border:none;color:var(--sea);text-decoration:underline;padding:0;font-weight:600}
 
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:8px max(16px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.nav .scroll::-webkit-scrollbar{display:none}
+.nav a{flex:none;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;min-height:36px;display:inline-flex;align-items:center;gap:6px}
+.nav a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.nav a .b{font-size:11px;font-weight:700;color:var(--free)}
+.nav a.on .b{color:var(--bg)}
+@media (min-width:1000px){.nav{display:none}}
+.month,.panel{scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
 .layout{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 320px;align-items:start}}
 .months{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
@@ -82,6 +100,7 @@ h1{font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1}
 .day.insel{background:var(--sel);border-color:var(--sea)}
 .day.edge{background:var(--sea);color:var(--bg)}
 .day.edge .n{color:var(--bg)}
+.day.edge .dot{box-shadow:0 0 0 1.5px var(--bg)}
 .day.blank{visibility:hidden}
 .day:hover{border-color:var(--sea)}
 .dots{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-end}
@@ -115,6 +134,46 @@ aside{display:grid;gap:16px}
 .reasons button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .bar .actions{margin-left:auto;display:flex;gap:8px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;z-index:20;font-size:14px}
+.sm{display:none}
+@media (max-width:640px){
+  .lg{display:none}.sm{display:inline}
+  body{padding-block:14px 120px}
+  .wrap{gap:14px}
+  header.top{align-items:center;flex-wrap:nowrap}
+  .brand{gap:10px;min-width:0}
+  .sun{width:36px;height:36px;box-shadow:0 0 0 4px color-mix(in srgb,var(--sun) 25%,transparent)}
+  .sun::after{height:16px;bottom:-4px;left:-4px;right:-4px}
+  h1{font-size:24px;line-height:1.05}
+  .brand{flex:1}
+  .brand>div:last-child{min-width:0}
+  .season{font-size:11px;margin-top:4px}
+  #exportBtn{padding:9px 12px;font-size:14px;flex:none}
+  .who{padding:12px}
+  .who form{width:100%;flex-wrap:nowrap}
+  .who input{flex:1;width:auto;font-size:16px;padding:10px 14px}
+  .who .btn{min-height:44px}
+  .who .hint{width:100%;order:3}
+  .chip{padding:7px 12px 7px 8px;font-size:14px}
+  .months{gap:12px}
+  .month{padding:12px 10px}
+  .grid{gap:3px}
+  .day{border-radius:8px;padding:4px 3px;aspect-ratio:1/1.12}
+  .day .n{font-size:14px}
+  .dot{width:8px;height:8px}
+  .day.free::after{width:5px;height:5px}
+  .panel{padding:14px}
+  .list li{min-height:44px}
+  .x{padding:10px 12px}
+  .bar{padding-top:10px}
+  .bar .inner{gap:8px}
+  .bar .what{font-size:16px}
+  .reasons{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none;padding-bottom:2px}
+  .reasons::-webkit-scrollbar{display:none}
+  .reasons button{flex:none;padding:8px 14px;font-size:14px}
+  .bar .actions{width:100%;margin-left:0}
+  .bar .actions .btn{flex:1;min-height:46px;font-size:15px;white-space:nowrap}
+  .bar .actions #saveSel{flex:2}
+}
 @media (prefers-reduced-motion:no-preference){.day{transition:background .15s,border-color .15s}}
 </style>
 </head>
@@ -125,16 +184,18 @@ aside{display:grid;gap:16px}
       <div class="sun" aria-hidden="true"></div>
       <div>
         <h1>Vacaciones del Grupo</h1>
-        <div class="season">Diciembre 2026 → Abril 2027</div>
+        <div class="season"><span class="lg">Diciembre 2026 → Abril 2027</span><span class="sm">Dic 2026 → Abr 2027</span></div>
       </div>
     </div>
-    <button class="btn sunny" id="exportBtn" type="button">Exportar imagen</button>
+    <button class="btn sunny" id="exportBtn" type="button">Exportar<span class="lg"> imagen</span></button>
   </header>
 
   <div class="notice" id="demoNotice" hidden>Modo prueba: todavía no está conectada la base compartida, así que lo que cargues se guarda solo en este navegador. Completá <code>config.js</code> con los datos de Supabase.</div>
   <div class="notice" id="errNotice" hidden></div>
 
   <section class="who" id="who"></section>
+
+  <nav class="nav" aria-label="Ir a"><div class="scroll" id="navScroll"></div></nav>
 
   <div class="layout">
     <main class="months" id="months" aria-label="Calendario"></main>
@@ -263,14 +324,44 @@ function freeWeekends(map){
 let MAP = new Map();
 function render(){
   MAP = busyMap();
-  renderWho(); renderMonths(); renderMine(); renderBest(); renderGroup(); renderBar();
+  renderWho(); renderNav(); renderMonths(); renderMine(); renderBest(); renderGroup(); renderBar();
+}
+
+let activeNav = `m-${MONTHS[0][0]}-${MONTHS[0][1]}`;
+function renderNav(){
+  const free = id => { const [, y, m] = id.split("-").map(Number); return state.people.length ? ALL_DAYS.filter(k => { const d = parse(k); return d.getUTCFullYear() === y && d.getUTCMonth() === m && !MAP.get(k).length; }).length : 0; };
+  const items = MONTHS.map(([y,m]) => { const id = `m-${y}-${m}`, f = free(id); return `<a href="#${id}" data-id="${id}"${f ? ` title="${f} días libres para todos"` : ""}>${MONTH_NAMES[m].slice(0,3)}${f ? ` <span class="b">${f}</span>` : ""}</a>`; })
+    .concat([`<a href="#bestPanel" data-id="bestPanel">Mejores fechas</a>`, `<a href="#minePanel" data-id="minePanel">Mis fechas</a>`, `<a href="#groupPanel" data-id="groupPanel">Grupo</a>`]);
+  const el = $("#navScroll"); el.innerHTML = items.join("");
+  el.querySelectorAll("a").forEach(a => a.onclick = e => {
+    e.preventDefault(); const t = document.getElementById(a.dataset.id); if (t) t.scrollIntoView({ block:"start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    setActiveNav(a.dataset.id);
+  });
+  setActiveNav(activeNav);
+}
+function setActiveNav(id){
+  activeNav = id;
+  document.querySelectorAll("#navScroll a").forEach(a => {
+    const on = a.dataset.id === id; a.classList.toggle("on", on);
+    if (on) { const sc = a.parentElement; const l = a.offsetLeft - sc.clientWidth/2 + a.clientWidth/2; sc.scrollTo({ left: l, behavior: "smooth" }); }
+  });
+}
+function watchSections(){
+  if (!("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(entries => {
+    const vis = entries.filter(e => e.isIntersecting).sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    if (vis && vis.target.id && vis.target.id !== activeNav) setActiveNav(vis.target.id);
+  }, { rootMargin: "-80px 0px -55% 0px" });
+  const observe = () => { io.disconnect(); document.querySelectorAll(".month[id], aside .panel").forEach(el => io.observe(el)); };
+  new MutationObserver(observe).observe($("#months"), { childList: true });
+  observe();
 }
 
 function renderWho(){
   const el = $("#who");
   if (state.me){
     el.innerHTML = `<div class="me-badge"><span class="dot" style="width:18px;height:18px;background:${colorOf(state.me)}"></span>Estás como <strong>${esc(state.me)}</strong></div>
-      <span class="sub" style="color:var(--muted);font-size:14px">Tocá un día de inicio y uno de fin para marcar cuándo no podés.</span>
+      <span class="sub hint" style="color:var(--muted);font-size:14px">Tocá un día de inicio y uno de fin para marcar cuándo no podés.</span>
       <button class="link" id="logout" type="button" style="margin-left:auto">No soy yo</button>`;
     $("#logout").onclick = () => { state.me = null; safeLS.del("vacas-me"); state.sel = { start:null,end:null }; render(); };
     return;
@@ -322,7 +413,7 @@ function renderMonths(){
       const label = `${humanLong(k)}. ${busy.length ? "No pueden: " + busy.map(b => b.person).join(", ") : state.people.length ? "Pueden todos" : ""}`;
       cells += `<button type="button" class="${cls.join(" ")}" data-k="${k}" title="${esc(label)}" aria-label="${esc(label)}"><span class="n">${d}</span><span class="dots">${dots}</span></button>`;
     }
-    return `<section class="month"><h2>${MONTH_NAMES[m]} <small>${y}${freeCount ? " · " + freeCount + " días libres para todos" : ""}</small></h2><div class="grid">${cells}</div></section>`;
+    return `<section class="month" id="m-${y}-${m}"><h2>${MONTH_NAMES[m]} <small>${y}${freeCount ? " · " + freeCount + " días libres para todos" : ""}</small></h2><div class="grid">${cells}</div></section>`;
   }).join("");
   el.querySelectorAll(".day[data-k]").forEach(b => b.onclick = () => onDay(b.dataset.k));
 }
@@ -381,13 +472,13 @@ function renderBar(){
   if (state.me && start){
     const a = start, b = end || start;
     inner.innerHTML = `<div style="min-width:0"><div class="what">${a === b ? humanLong(a) : `${human(a)} → ${human(b)} · ${span(a,b)} días`}</div>
-      <div class="sub">${end ? "¿Por qué no podés?" : "Tocá otro día para el fin, o guardá solo este."}</div></div>
+      <div class="sub">${end ? "¿Por qué no podés?" : `Tocá otro día para el fin, o guardá solo este.${busyLine(a)}`}</div></div>
       <div class="reasons">${REASONS.map(r => `<button type="button" aria-pressed="${state.reason === r}" data-r="${r}">${r}</button>`).join("")}</div>
-      <div class="actions"><button class="btn" type="button" id="cancelSel">Cancelar</button><button class="btn primary" type="button" id="saveSel" ${state.saving ? "disabled" : ""}>No puedo esos días</button></div>`;
+      <div class="actions"><button class="btn" type="button" id="cancelSel">Cancelar</button><button class="btn primary" type="button" id="saveSel" ${state.saving ? "disabled" : ""}>${a === b ? "No puedo ese día" : "No puedo esos días"}</button></div>`;
     inner.querySelectorAll("[data-r]").forEach(x => x.onclick = () => { state.reason = x.dataset.r; renderBar(); });
     $("#cancelSel").onclick = () => { state.sel = { start:null,end:null }; render(); };
     $("#saveSel").onclick = saveSel;
-    bar.hidden = false; return;
+    bar.hidden = false; syncBarSpace(); return;
   }
   if (state.detail){
     const busy = MAP.get(state.detail) || [];
@@ -396,9 +487,18 @@ function renderBar(){
       ${state.me ? "" : " · Entrá con tu nombre para marcar tus fechas."}</div></div>
       <div class="actions"><button class="btn" type="button" id="closeDetail">Cerrar</button></div>`;
     $("#closeDetail").onclick = () => { state.detail = null; renderBar(); };
-    bar.hidden = false; return;
+    bar.hidden = false; syncBarSpace(); return;
   }
-  bar.hidden = true;
+  bar.hidden = true; syncBarSpace();
+}
+
+function busyLine(k){
+  const busy = (MAP.get(k) || []).filter(b => b.person !== state.me);
+  return busy.length ? `<br>Ese día no pueden: ${busy.map(b => `<strong style="color:${colorOf(b.person)}">${esc(b.person)}</strong>`).join(", ")}` : "";
+}
+function syncBarSpace(){
+  const bar = $("#bar");
+  document.body.style.paddingBottom = bar.hidden ? "" : `${bar.offsetHeight + 24}px`;
 }
 
 async function saveSel(){
@@ -523,6 +623,11 @@ function exportImage(){
 
   cv.toBlob(async blob => {
     const file = new File([blob], "vacaciones-del-grupo.png", { type:"image/png" });
+    const touch = matchMedia("(pointer: coarse)").matches;
+    if (touch && navigator.canShare && navigator.canShare({ files:[file] })){
+      try { await navigator.share({ files:[file], title:"Vacaciones del Grupo" }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = file.name;
     document.body.appendChild(a); a.click(); a.remove();
@@ -530,12 +635,14 @@ function exportImage(){
     toast("Imagen descargada");
   }, "image/png");
 }
-$("#exportBtn").onclick = async () => { try { await document.fonts.ready; } catch {} exportImage(); };
+$("#exportBtn").onclick = async () => {
+  $("#exportBtn").disabled = true; setTimeout(() => $("#exportBtn").disabled = false, 1500); try { await document.fonts.ready; } catch {} exportImage(); };
 window.__exportCanvasForTest = exportImage;
 
 // ---------- Arranque ----------
 $("#demoNotice").hidden = hasSupabase;
 render();
+watchSections();
 refresh();
 store.subscribe(() => refresh());
 window.addEventListener("focus", () => refresh());
