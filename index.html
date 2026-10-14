@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vacaciones del Grupo</title>
+<meta name="description" content="Marcá qué días no podés entre diciembre y abril y encontremos cuándo juntarnos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FFB627'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: calendario de temporada (5 meses en grilla) + columna lateral con mis fechas, mejores fechas y el grupo */
+:root{
+  --bg:#F3F6F9; --surface:#FFFFFF; --ink:#0F2A3A; --muted:#5B7083; --line:#DCE4EB;
+  --sun:#FFB627; --sun-ink:#5A3B00; --sea:#1F6F8B; --free:#22A06B; --free-bg:#DDF5E9;
+  --busy:#E4572E; --sel:#1F6F8B33;
+  --font-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1A24; --surface:#122633; --ink:#E8F0F5; --muted:#93A9B9; --line:#23394A;
+    --sun:#FFC24D; --sun-ink:#3A2600; --sea:#5DB7D6; --free:#43C98A; --free-bg:#123B2C;
+    --busy:#FF7A55; --sel:#5DB7D640; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1A24; --surface:#122633; --ink:#E8F0F5; --muted:#93A9B9; --line:#23394A;
+  --sun:#FFC24D; --sun-ink:#3A2600; --sea:#5DB7D6; --free:#43C98A; --free-bg:#123B2C;
+  --busy:#FF7A55; --sel:#5DB7D640; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:20px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+.brand{display:flex;gap:14px;align-items:center}
+.sun{width:52px;height:52px;border-radius:50%;background:var(--sun);flex:none;position:relative;box-shadow:0 0 0 6px color-mix(in srgb,var(--sun) 25%,transparent)}
+.sun::after{content:"";position:absolute;left:-6px;right:-6px;bottom:-6px;height:22px;background:linear-gradient(transparent 0 3px,var(--sea) 3px 7px,transparent 7px 11px,var(--sea) 11px 15px,transparent 15px);opacity:.85;border-radius:0 0 30px 30px}
+h1{font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1}
+.season{color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:12px;margin-top:6px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 16px;font-weight:600}
+.btn:hover{border-color:var(--sea)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sunny{background:var(--sun);color:var(--sun-ink);border-color:var(--sun)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.notice{background:color-mix(in srgb,var(--sun) 22%,var(--surface));border:1px solid color-mix(in srgb,var(--sun) 60%,var(--line));border-radius:var(--r);padding:10px 14px;font-size:14px}
+
+.who{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.who form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.who input{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:8px 14px;min-width:0;width:200px;max-width:100%}
+.who .label{font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 10px 4px 6px;font-size:13px;font-weight:600}
+.chip .dot{width:14px;height:14px}
+.me-badge{display:flex;align-items:center;gap:10px;font-weight:600}
+.link{background:none;border:none;color:var(--sea);text-decoration:underline;padding:0;font-weight:600}
+
+.layout{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 320px;align-items:start}}
+.months{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
+.month{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.month h2{font-size:20px;font-weight:700;display:flex;flex-wrap:wrap;gap:2px 10px;justify-content:space-between;align-items:baseline}
+.month h2 small{font-family:var(--font-body);font-size:12px;color:var(--muted);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px}
+.wd{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;font-weight:700;padding-bottom:2px}
+.day{aspect-ratio:1/1.05;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:3px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;text-align:left;position:relative;min-width:0;max-width:100%}
+.day .n{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.day.we .n{color:var(--sea)}
+.day.free{background:var(--free-bg);border-color:color-mix(in srgb,var(--free) 45%,var(--line))}
+.day.free::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--free)}
+.day.mine{box-shadow:inset 0 0 0 2px var(--busy)}
+.day.insel{background:var(--sel);border-color:var(--sea)}
+.day.edge{background:var(--sea);color:var(--bg)}
+.day.edge .n{color:var(--bg)}
+.day.blank{visibility:hidden}
+.day:hover{border-color:var(--sea)}
+.dots{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-end}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+.more{font-size:9px;font-weight:700;color:var(--muted);line-height:9px}
+
+aside{display:grid;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px;min-width:0}
+.panel h3{font-size:17px;font-weight:700}
+.panel p{margin:0;color:var(--muted);font-size:14px}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.list li{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:6px;font-size:14px}
+.list li:last-child{border-bottom:none}
+.list .tag{font-size:12px;color:var(--muted)}
+.x{border:none;background:none;color:var(--busy);font-weight:700;padding:2px 6px;border-radius:6px}
+.x:hover{background:color-mix(in srgb,var(--busy) 15%,transparent)}
+.len{font-variant-numeric:tabular-nums;font-weight:700;color:var(--free);white-space:nowrap}
+.legend{display:grid;gap:6px}
+.legend .row{display:flex;align-items:center;gap:8px;font-size:14px}
+.legend .row .count{margin-left:auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.key{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:4px;border:1px solid var(--line);display:inline-block}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(0,0,0,.08)}
+.bar .inner{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.bar .what{font-weight:700;min-width:0}
+.bar .sub{color:var(--muted);font-size:14px;min-width:0}
+.reasons{display:flex;flex-wrap:wrap;gap:6px}
+.reasons button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.reasons button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar .actions{margin-left:auto;display:flex;gap:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;z-index:20;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.day{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="sun" aria-hidden="true"></div>
+      <div>
+        <h1>Vacaciones del Grupo</h1>
+        <div class="season">Diciembre 2026 → Abril 2027</div>
+      </div>
+    </div>
+    <button class="btn sunny" id="exportBtn" type="button">Exportar imagen</button>
+  </header>
+
+  <div class="notice" id="demoNotice" hidden>Modo prueba: todavía no está conectada la base compartida, así que lo que cargues se guarda solo en este navegador. Completá <code>config.js</code> con los datos de Supabase.</div>
+  <div class="notice" id="errNotice" hidden></div>
+
+  <section class="who" id="who"></section>
+
+  <div class="layout">
+    <main class="months" id="months" aria-label="Calendario"></main>
+    <aside>
+      <section class="panel" id="minePanel"></section>
+      <section class="panel" id="bestPanel"></section>
+      <section class="panel" id="groupPanel"></section>
+    </aside>
+  </div>
+</div>
+
+<div class="bar" id="bar" hidden><div class="inner" id="barInner"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(() => {
+// ---------- Temporada ----------
+const SEASON_START = "2026-12-01", SEASON_END = "2027-04-30";
+const MONTHS = [[2026,11],[2027,0],[2027,1],[2027,2],[2027,3]];
+const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const MONTH_SHORT = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const WD = ["L","M","M","J","V","S","D"];
+const WD_LONG = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const REASONS = ["Vacaciones","Viaje","Laburo","Familia","Otro"];
+const PALETTE = ["#E4572E","#1F8A70","#7B4FD6","#E0A100","#2E86DE","#D63384","#3D9970","#F17C1C","#6C5CE7","#00A6A6","#B5651D","#C0392B","#2C7A7B","#8E44AD","#5D9B1E","#E84393"];
+
+// ---------- Fechas (todo en UTC para evitar líos de zona horaria) ----------
+const key = (y,m,d) => `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+const parse = k => { const [y,m,d] = k.split("-").map(Number); return new Date(Date.UTC(y,m-1,d)); };
+const fmt = dt => key(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
+const addDays = (k,n) => { const d = parse(k); d.setUTCDate(d.getUTCDate()+n); return fmt(d); };
+const wday = k => (parse(k).getUTCDay()+6)%7; // 0 = lunes
+const human = k => { const d = parse(k); return `${d.getUTCDate()} ${MONTH_SHORT[d.getUTCMonth()]}`; };
+const humanLong = k => { const d = parse(k); return `${WD_LONG[wday(k)]} ${d.getUTCDate()} de ${MONTH_NAMES[d.getUTCMonth()].toLowerCase()}`; };
+const span = (a,b) => Math.round((parse(b)-parse(a))/864e5)+1;
+const ALL_DAYS = []; for (let k = SEASON_START; k <= SEASON_END; k = addDays(k,1)) ALL_DAYS.push(k);
+
+// ---------- Almacenamiento ----------
+const safeLS = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+const cfg = window.APP_CONFIG || {};
+const hasSupabase = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+
+function makeStore(){
+  if (hasSupabase){
+    const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+    const check = ({data,error}) => { if (error) throw error; return data; };
+    return {
+      async load(){
+        const [people, ranges] = await Promise.all([
+          sb.from("people").select("name,color").order("created_at").then(check),
+          sb.from("ranges").select("id,person,start_date,end_date,reason").order("start_date").then(check),
+        ]);
+        return { people, ranges };
+      },
+      addPerson: p => sb.from("people").upsert(p, { onConflict:"name", ignoreDuplicates:true }).then(check),
+      addRange: r => sb.from("ranges").insert(r).then(check),
+      deleteRange: id => sb.from("ranges").delete().eq("id", id).then(check),
+      subscribe(cb){
+        sb.channel("cambios")
+          .on("postgres_changes", { event:"*", schema:"public", table:"people" }, cb)
+          .on("postgres_changes", { event:"*", schema:"public", table:"ranges" }, cb)
+          .subscribe();
+      },
+    };
+  }
+  const LS_KEY = "vacas-demo-db";
+  const read = () => { try { return JSON.parse(safeLS.get(LS_KEY)) || { people:[], ranges:[] }; } catch { return { people:[], ranges:[] }; } };
+  const write = db => safeLS.set(LS_KEY, JSON.stringify(db));
+  return {
+    async load(){ return read(); },
+    async addPerson(p){ const db = read(); if (!db.people.some(x => x.name === p.name)) db.people.push(p); write(db); },
+    async addRange(r){ const db = read(); db.ranges.push({ id: String(Date.now()) + Math.random().toString(36).slice(2,6), ...r }); write(db); },
+    async deleteRange(id){ const db = read(); db.ranges = db.ranges.filter(r => r.id !== id); write(db); },
+    subscribe(){},
+  };
+}
+const store = makeStore();
+
+// ---------- Estado ----------
+const state = {
+  people: [], ranges: [],
+  me: safeLS.get("vacas-me") || null,
+  sel: { start:null, end:null }, reason: "Vacaciones",
+  detail: null, saving: false,
+};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const colorOf = name => (state.people.find(p => p.name === name) || {}).color || "#888";
+const initials = name => name.trim().split(/\s+/).map(w => w[0]).join("").slice(0,2).toUpperCase();
+
+function busyMap(){
+  const map = new Map(ALL_DAYS.map(k => [k, []]));
+  for (const r of state.ranges){
+    let a = r.start_date < SEASON_START ? SEASON_START : r.start_date;
+    const b = r.end_date > SEASON_END ? SEASON_END : r.end_date;
+    for (let k = a; k <= b; k = addDays(k,1)){
+      const arr = map.get(k);
+      if (arr && !arr.some(x => x.person === r.person)) arr.push({ person:r.person, reason:r.reason });
+    }
+  }
+  return map;
+}
+
+function freeRuns(map){
+  if (!state.people.length) return [];
+  const runs = []; let cur = null;
+  for (const k of ALL_DAYS){
+    if (map.get(k).length === 0){ if (cur) cur.end = k; else cur = { start:k, end:k }; }
+    else if (cur){ runs.push(cur); cur = null; }
+  }
+  if (cur) runs.push(cur);
+  return runs;
+}
+function freeWeekends(map){
+  if (!state.people.length) return [];
+  return ALL_DAYS.filter(k => wday(k) === 5 && map.has(addDays(k,1)) && !map.get(k).length && !map.get(addDays(k,1)).length);
+}
+
+// ---------- Render ----------
+let MAP = new Map();
+function render(){
+  MAP = busyMap();
+  renderWho(); renderMonths(); renderMine(); renderBest(); renderGroup(); renderBar();
+}
+
+function renderWho(){
+  const el = $("#who");
+  if (state.me){
+    el.innerHTML = `<div class="me-badge"><span class="dot" style="width:18px;height:18px;background:${colorOf(state.me)}"></span>Estás como <strong>${esc(state.me)}</strong></div>
+      <span class="sub" style="color:var(--muted);font-size:14px">Tocá un día de inicio y uno de fin para marcar cuándo no podés.</span>
+      <button class="link" id="logout" type="button" style="margin-left:auto">No soy yo</button>`;
+    $("#logout").onclick = () => { state.me = null; safeLS.del("vacas-me"); state.sel = { start:null,end:null }; render(); };
+    return;
+  }
+  const chips = state.people.map(p => `<button class="chip" type="button" data-name="${esc(p.name)}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join("");
+  el.innerHTML = `<span class="label">¿Quién sos?</span>
+    <form id="nameForm"><input id="nameInput" maxlength="24" placeholder="Tu nombre" autocomplete="given-name" required><button class="btn primary" type="submit">Entrar</button></form>
+    ${chips ? `<span style="color:var(--muted);font-size:14px">o elegí:</span><div class="chips">${chips}</div>` : ""}`;
+  $("#nameForm").onsubmit = e => { e.preventDefault(); login($("#nameInput").value); };
+  el.querySelectorAll(".chip").forEach(b => b.onclick = () => login(b.dataset.name));
+}
+
+async function login(raw){
+  const name = raw.trim().replace(/\s+/g," ").slice(0,24);
+  if (!name) return;
+  const existing = state.people.find(p => p.name.toLowerCase() === name.toLowerCase());
+  const finalName = existing ? existing.name : name;
+  if (!existing){
+    const used = new Set(state.people.map(p => p.color));
+    const color = PALETTE.find(c => !used.has(c)) || PALETTE[state.people.length % PALETTE.length];
+    try { await store.addPerson({ name: finalName, color }); }
+    catch (e) { return showError("No pude guardar tu nombre. Revisá la conexión e intentá de nuevo.", e); }
+  }
+  state.me = finalName; safeLS.set("vacas-me", finalName);
+  await refresh();
+}
+
+function renderMonths(){
+  const el = $("#months");
+  const { start, end } = state.sel;
+  const lo = start && end ? (start < end ? start : end) : start;
+  const hi = start && end ? (start < end ? end : start) : start;
+  el.innerHTML = MONTHS.map(([y,m]) => {
+    const first = key(y,m,1), offset = wday(first);
+    const days = new Date(Date.UTC(y,m+1,0)).getUTCDate();
+    let freeCount = 0, cells = WD.map(w => `<div class="wd">${w}</div>`).join("");
+    for (let i=0;i<offset;i++) cells += `<div class="day blank" aria-hidden="true"></div>`;
+    for (let d=1; d<=days; d++){
+      const k = key(y,m,d), busy = MAP.get(k) || [];
+      const free = state.people.length && !busy.length;
+      if (free) freeCount++;
+      const cls = ["day"];
+      if (wday(k) >= 5) cls.push("we");
+      if (free) cls.push("free");
+      if (state.me && busy.some(b => b.person === state.me)) cls.push("mine");
+      if (lo && k >= lo && k <= hi) cls.push(k === lo || k === hi ? "edge" : "insel");
+      const shown = busy.slice(0,8);
+      const dots = shown.map(b => `<span class="dot" style="background:${colorOf(b.person)}"></span>`).join("") + (busy.length > 8 ? `<span class="more">+${busy.length-8}</span>` : "");
+      const label = `${humanLong(k)}. ${busy.length ? "No pueden: " + busy.map(b => b.person).join(", ") : state.people.length ? "Pueden todos" : ""}`;
+      cells += `<button type="button" class="${cls.join(" ")}" data-k="${k}" title="${esc(label)}" aria-label="${esc(label)}"><span class="n">${d}</span><span class="dots">${dots}</span></button>`;
+    }
+    return `<section class="month"><h2>${MONTH_NAMES[m]} <small>${y}${freeCount ? " · " + freeCount + " días libres para todos" : ""}</small></h2><div class="grid">${cells}</div></section>`;
+  }).join("");
+  el.querySelectorAll(".day[data-k]").forEach(b => b.onclick = () => onDay(b.dataset.k));
+}
+
+function onDay(k){
+  state.detail = k;
+  if (state.me){
+    const s = state.sel;
+    if (!s.start || s.end) state.sel = { start:k, end:null };
+    else state.sel = { start: s.start < k ? s.start : k, end: s.start < k ? k : s.start };
+  }
+  render();
+}
+
+function renderMine(){
+  const el = $("#minePanel");
+  if (!state.me){ el.innerHTML = `<h3>Mis fechas</h3><p>Entrá con tu nombre para marcar los días que no podés.</p>`; return; }
+  const mine = state.ranges.filter(r => r.person === state.me).sort((a,b) => a.start_date.localeCompare(b.start_date));
+  el.innerHTML = `<h3>Mis fechas</h3>` + (mine.length
+    ? `<ul class="list">${mine.map(r => `<li><span>${r.start_date === r.end_date ? human(r.start_date) : `${human(r.start_date)} → ${human(r.end_date)}`}<br><span class="tag">${esc(r.reason || "Sin motivo")} · ${span(r.start_date,r.end_date)} ${span(r.start_date,r.end_date) === 1 ? "día" : "días"}</span></span><button class="x" type="button" data-id="${esc(r.id)}" aria-label="Borrar">Borrar</button></li>`).join("")}</ul>`
+    : `<p>Todavía no marcaste nada. Si podés todos los días, ¡genial! No hace falta cargar nada.</p>`);
+  el.querySelectorAll(".x").forEach(b => b.onclick = async () => {
+    try { await store.deleteRange(b.dataset.id); toast("Borrado"); await refresh(); }
+    catch (e) { showError("No pude borrar esa fecha. Intentá de nuevo.", e); }
+  });
+}
+
+function bestLists(){
+  const runs = freeRuns(MAP).filter(r => span(r.start,r.end) >= 2)
+    .sort((a,b) => span(b.start,b.end) - span(a.start,a.end) || a.start.localeCompare(b.start)).slice(0,6);
+  return { runs, weekends: freeWeekends(MAP) };
+}
+function renderBest(){
+  const el = $("#bestPanel");
+  if (!state.people.length){ el.innerHTML = `<h3>Mejores fechas</h3><p>Cuando el grupo cargue sus fechas, acá aparecen los días en que podemos todos.</p>`; return; }
+  const { runs, weekends } = bestLists();
+  el.innerHTML = `<h3>Mejores fechas</h3>
+    <p>Rachas en las que pueden los ${state.people.length}.</p>
+    ${runs.length ? `<ul class="list">${runs.map(r => `<li><span>${human(r.start)} → ${human(r.end)}</span><span class="len">${span(r.start,r.end)} días</span></li>`).join("")}</ul>` : `<p><strong>No hay rachas de 2 días o más con todos libres.</strong></p>`}
+    <h3 style="font-size:15px;margin-top:6px">Findes libres para todos</h3>
+    ${weekends.length ? `<div class="chips">${weekends.map(k => `<span class="chip" style="padding-left:10px">${human(k)}–${human(addDays(k,1))}</span>`).join("")}</div>` : `<p>Ningún finde completo por ahora.</p>`}`;
+}
+
+function renderGroup(){
+  const el = $("#groupPanel");
+  const counts = {}; for (const k of ALL_DAYS) for (const b of MAP.get(k)) counts[b.person] = (counts[b.person]||0)+1;
+  el.innerHTML = `<h3>El grupo</h3>` + (state.people.length
+    ? `<div class="legend">${state.people.map(p => `<div class="row"><span class="dot" style="width:14px;height:14px;background:${p.color}"></span>${esc(p.name)}<span class="count">${counts[p.name] ? counts[p.name] + " días afuera" : "puede siempre"}</span></div>`).join("")}</div>`
+    : `<p>Nadie se sumó todavía. Pasales el link al grupo.</p>`) +
+    `<div class="key"><span><i class="sw" style="background:var(--free-bg)"></i>Pueden todos</span><span><i class="dot" style="background:var(--busy)"></i>Un punto por persona que no puede</span></div>`;
+}
+
+function renderBar(){
+  const bar = $("#bar"), inner = $("#barInner");
+  const { start, end } = state.sel;
+  if (state.me && start){
+    const a = start, b = end || start;
+    inner.innerHTML = `<div style="min-width:0"><div class="what">${a === b ? humanLong(a) : `${human(a)} → ${human(b)} · ${span(a,b)} días`}</div>
+      <div class="sub">${end ? "¿Por qué no podés?" : "Tocá otro día para el fin, o guardá solo este."}</div></div>
+      <div class="reasons">${REASONS.map(r => `<button type="button" aria-pressed="${state.reason === r}" data-r="${r}">${r}</button>`).join("")}</div>
+      <div class="actions"><button class="btn" type="button" id="cancelSel">Cancelar</button><button class="btn primary" type="button" id="saveSel" ${state.saving ? "disabled" : ""}>No puedo esos días</button></div>`;
+    inner.querySelectorAll("[data-r]").forEach(x => x.onclick = () => { state.reason = x.dataset.r; renderBar(); });
+    $("#cancelSel").onclick = () => { state.sel = { start:null,end:null }; render(); };
+    $("#saveSel").onclick = saveSel;
+    bar.hidden = false; return;
+  }
+  if (state.detail){
+    const busy = MAP.get(state.detail) || [];
+    inner.innerHTML = `<div style="min-width:0"><div class="what">${humanLong(state.detail)}</div>
+      <div class="sub">${busy.length ? "No pueden: " + busy.map(b => `<strong style="color:${colorOf(b.person)}">${esc(b.person)}</strong>${b.reason ? ` (${esc(b.reason.toLowerCase())})` : ""}`).join(", ") : state.people.length ? "¡Pueden todos!" : "Sin datos todavía."}
+      ${state.me ? "" : " · Entrá con tu nombre para marcar tus fechas."}</div></div>
+      <div class="actions"><button class="btn" type="button" id="closeDetail">Cerrar</button></div>`;
+    $("#closeDetail").onclick = () => { state.detail = null; renderBar(); };
+    bar.hidden = false; return;
+  }
+  bar.hidden = true;
+}
+
+async function saveSel(){
+  const { start, end } = state.sel;
+  state.saving = true; renderBar();
+  try {
+    await store.addRange({ person: state.me, start_date: start, end_date: end || start, reason: state.reason });
+    state.sel = { start:null,end:null }; state.detail = null;
+    toast("Guardado");
+    await refresh();
+  } catch (e) { showError("No pude guardar esas fechas. Intentá de nuevo.", e); }
+  finally { state.saving = false; renderBar(); }
+}
+
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 1800); }
+function showError(msg, e){ console.error(e); const n = $("#errNotice"); n.textContent = msg; n.hidden = false; setTimeout(() => n.hidden = true, 6000); }
+
+async function refresh(){
+  try {
+    const { people, ranges } = await store.load();
+    state.people = people; state.ranges = ranges;
+    if (state.me && !people.some(p => p.name === state.me)){ state.me = null; safeLS.del("vacas-me"); }
+  } catch (e) { showError("No pude cargar los datos del grupo. Revisá la conexión.", e); }
+  render();
+}
+
+// ---------- Exportar imagen ----------
+function exportImage(){
+  const C = { bg:"#F3F6F9", card:"#FFFFFF", ink:"#0F2A3A", muted:"#5B7083", line:"#DCE4EB", sun:"#FFB627", sea:"#1F6F8B", free:"#22A06B", freeBg:"#DDF5E9" };
+  const W = 1800, M = 80, GAP = 36, COLW = (W - 2*M - 2*GAP)/3;
+  const CELL = (COLW - 40) / 7, CELLH = CELL * 0.98;
+  const ROWS = Math.max(...MONTHS.map(([y,m]) => Math.ceil((wday(key(y,m,1)) + new Date(Date.UTC(y,m+1,0)).getUTCDate())/7)));
+  const CARDH = 92 + ROWS*CELLH + 24;
+  const HEAD = 250;
+  const H = HEAD + 2*CARDH + GAP + 110;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const g = cv.getContext("2d");
+  const DISP = "'Bricolage Grotesque', 'Avenir Next', sans-serif", BODY = "'Figtree', 'Segoe UI', sans-serif";
+  const rr = (x,y,w,h,r) => { g.beginPath(); g.roundRect(x,y,w,h,r); };
+
+  g.fillStyle = C.bg; g.fillRect(0,0,W,H);
+  // Sol y mar
+  g.fillStyle = C.sun; g.beginPath(); g.arc(W - M - 70, 120, 70, 0, Math.PI*2); g.fill();
+  g.fillStyle = C.bg; g.fillRect(W - M - 150, 148, 160, 60);
+  g.strokeStyle = C.sea; g.lineWidth = 7; g.lineCap = "round";
+  for (let i=0;i<3;i++){ g.beginPath(); const y = 160 + i*18; for (let x = W-M-150; x <= W-M+10; x += 4){ const yy = y + Math.sin((x+i*20)/14)*4; x === W-M-150 ? g.moveTo(x,yy) : g.lineTo(x,yy); } g.stroke(); }
+
+  g.fillStyle = C.ink; g.font = `800 84px ${DISP}`; g.textBaseline = "alphabetic";
+  g.fillText("Vacaciones del Grupo", M, 140);
+  g.fillStyle = C.muted; g.font = `600 30px ${BODY}`;
+  g.fillText(`DICIEMBRE 2026 → ABRIL 2027  ·  ${state.people.length} ${state.people.length === 1 ? "PERSONA" : "PERSONAS"}`, M, 192);
+
+  const drawMonth = (y,m,x,top) => {
+    g.fillStyle = C.card; rr(x,top,COLW,CARDH,22); g.fill();
+    g.strokeStyle = C.line; g.lineWidth = 2; g.stroke();
+    g.fillStyle = C.ink; g.font = `700 40px ${DISP}`; g.fillText(MONTH_NAMES[m], x+22, top+56);
+    g.fillStyle = C.muted; g.font = `600 22px ${BODY}`; g.textAlign = "right"; g.fillText(String(y), x+COLW-22, top+54); g.textAlign = "left";
+    const gx = x+20, gy = top+92;
+    g.font = `700 18px ${BODY}`; g.textAlign = "center";
+    WD.forEach((w,i) => { g.fillStyle = i>=5 ? C.sea : C.muted; g.fillText(w, gx + i*CELL + CELL/2, gy-10); });
+    g.textAlign = "left";
+    const off = wday(key(y,m,1)), days = new Date(Date.UTC(y,m+1,0)).getUTCDate();
+    for (let d=1; d<=days; d++){
+      const idx = off + d - 1, cx = gx + (idx%7)*CELL, cy = gy + Math.floor(idx/7)*CELLH;
+      const k = key(y,m,d), busy = MAP.get(k) || [], free = state.people.length && !busy.length;
+      g.fillStyle = free ? C.freeBg : C.bg; rr(cx+3, cy+3, CELL-6, CELLH-6, 10); g.fill();
+      if (free){ g.strokeStyle = C.free; g.lineWidth = 2; g.stroke(); }
+      g.fillStyle = idx%7 >= 5 ? C.sea : C.ink; g.font = `700 20px ${BODY}`; g.fillText(String(d), cx+11, cy+28);
+      // Iniciales de quienes no pueden
+      const r = 12, per = 3, sx = cx + 10, sy = cy + CELLH - 20;
+      const shown = busy.length > 6 ? busy.slice(0,5) : busy;
+      shown.forEach((b,i) => {
+        const px = sx + (i%per)*(r*2+3) + r, py = sy - Math.floor(i/per)*(r*2+3);
+        g.fillStyle = colorOf(b.person); g.beginPath(); g.arc(px,py,r,0,Math.PI*2); g.fill();
+        g.fillStyle = "#fff"; g.font = `700 ${initials(b.person).length > 1 ? 10 : 12}px ${BODY}`; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillText(initials(b.person), px, py+1); g.textAlign = "left"; g.textBaseline = "alphabetic";
+      });
+      if (busy.length > 6){ const i = 5, px = sx + (i%per)*(r*2+3) + r, py = sy - Math.floor(i/per)*(r*2+3);
+        g.fillStyle = C.muted; g.beginPath(); g.arc(px,py,r,0,Math.PI*2); g.fill();
+        g.fillStyle = "#fff"; g.font = `700 11px ${BODY}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(`+${busy.length-5}`, px, py+1); g.textAlign = "left"; g.textBaseline = "alphabetic"; }
+      if (free){ g.fillStyle = C.free; g.beginPath(); g.arc(cx+CELL-16, cy+18, 5, 0, Math.PI*2); g.fill(); }
+    }
+  };
+  MONTHS.forEach(([y,m],i) => drawMonth(y, m, M + (i%3)*(COLW+GAP), HEAD + Math.floor(i/3)*(CARDH+GAP)));
+
+  // Sexto casillero: quién es quién + mejores fechas
+  const lx = M + 2*(COLW+GAP), ly = HEAD + CARDH + GAP;
+  g.fillStyle = C.ink; rr(lx, ly, COLW, CARDH, 22); g.fill();
+  g.fillStyle = C.sun; g.font = `700 30px ${DISP}`; g.fillText("Quién no puede", lx+26, ly+50);
+  const cols = state.people.length > 8 ? 2 : 1, colW = (COLW-52)/cols;
+  const rowsPer = Math.ceil(state.people.length / cols) || 1;
+  const rowH = Math.min(32, (CARDH - 82 - 230) / rowsPer);
+  state.people.forEach((p,i) => {
+    const px = lx + 26 + Math.floor(i/rowsPer)*colW, py = ly + 82 + (i%rowsPer)*rowH;
+    g.fillStyle = p.color; g.beginPath(); g.arc(px+12, py, 12, 0, Math.PI*2); g.fill();
+    g.fillStyle = "#fff"; g.font = `700 10px ${BODY}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(initials(p.name), px+12, py+1);
+    g.textAlign = "left"; g.font = `600 ${rowH < 28 ? 18 : 22}px ${BODY}`; g.fillStyle = "#F3F6F9"; g.fillText(p.name.length > 16 ? p.name.slice(0,15)+"…" : p.name, px+32, py+1);
+    g.textBaseline = "alphabetic";
+  });
+  if (!state.people.length){ g.fillStyle = "#93A9B9"; g.font = `500 22px ${BODY}`; g.fillText("Todavía nadie cargó fechas.", lx+26, ly+90); }
+  const by = ly + 82 + rowsPer*rowH + 34;
+  g.fillStyle = C.free; g.font = `700 26px ${DISP}`; g.fillText("Mejores fechas para juntarnos", lx+26, by);
+  const { runs, weekends } = bestLists();
+  g.font = `600 21px ${BODY}`; g.fillStyle = "#F3F6F9";
+  const lines = runs.slice(0,4).map(r => `${human(r.start)} → ${human(r.end)}  ·  ${span(r.start,r.end)} días`);
+  if (!lines.length) lines.push(state.people.length ? "No hay rachas con todos libres" : "—");
+  lines.forEach((t,i) => g.fillText(t, lx+26, by + 40 + i*32));
+  if (weekends.length){
+    g.fillStyle = "#93A9B9"; g.font = `600 18px ${BODY}`;
+    const wk = "Findes: " + weekends.slice(0,6).map(k => `${parse(k).getUTCDate()}/${parse(k).getUTCMonth()+1}`).join(", ") + (weekends.length > 6 ? "…" : "");
+    g.fillText(wk, lx+26, by + 40 + lines.length*32 + 6);
+  }
+
+  // Pie
+  const fy = H - 60;
+  g.fillStyle = C.freeBg; rr(M, fy-24, 30, 30, 8); g.fill(); g.strokeStyle = C.free; g.lineWidth = 2; g.stroke();
+  g.fillStyle = C.muted; g.font = `600 22px ${BODY}`; g.fillText("Pueden todos", M+44, fy);
+  g.fillStyle = "#E4572E"; g.beginPath(); g.arc(M+262, fy-9, 12, 0, Math.PI*2); g.fill();
+  g.fillStyle = C.muted; g.fillText("Iniciales de quien no puede ese día", M+284, fy);
+  g.textAlign = "right"; g.fillText(`Actualizado ${new Date().toLocaleDateString("es-AR")}`, W-M, fy); g.textAlign = "left";
+
+  cv.toBlob(async blob => {
+    const file = new File([blob], "vacaciones-del-grupo.png", { type:"image/png" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    toast("Imagen descargada");
+  }, "image/png");
+}
+$("#exportBtn").onclick = async () => { try { await document.fonts.ready; } catch {} exportImage(); };
+window.__exportCanvasForTest = exportImage;
+
+// ---------- Arranque ----------
+$("#demoNotice").hidden = hasSupabase;
+render();
+refresh();
+store.subscribe(() => refresh());
+window.addEventListener("focus", () => refresh());
+setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+})();
+</script>
+</body>
+</html>
